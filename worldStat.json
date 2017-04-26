@@ -1,0 +1,114 @@
+{
+	"objects": {
+		"cube": [{
+			"id": 1,
+			"dimention": {
+				"ab": 2,
+				"ad": 2,
+				"ae": 7
+			},
+			"placement": {
+				"x": 7,
+				"y": 5,
+				"z": 0
+			},
+			"color": 8169980 
+		},
+		{
+			"id": 2,
+			"dimention": {
+				"ab": 1,
+				"ad": 1,
+				"ae": 4
+			},
+			"placement": {
+				"x": 4,
+				"y": 4,
+				"z": 6
+			},
+			"color": 16711680 
+			}
+		],
+   "plane": {"width" : 60,
+            "height" : 20,
+            "placement" : { "x" : 0,
+              "y" : 0,
+              "z" : 0},
+              "color": "0xffffff"
+                       ,
+              "rotation": "default"
+              },
+   "camera" : {
+                 "type" : "perspective",
+                 "attribute" : { 
+                     "fov" : "default",
+                     "aspect_ratio" : "default",
+                     "near" : 0.1,
+                     "far"  : 1000
+                 },
+                 "lookAt" : { "x": 0,
+                              "y" : 0,
+                              "z" : 0
+                 },
+                 "placement" : {
+                                "x": 0,
+                                "y": 40 ,
+                                "z" : 200
+                 }
+              },
+    "robots" : [{ "id" : "R1",
+                 "placement" : {
+                                "row": 7,
+                                "col": 7 
+                 },
+                  "color" : "0x22222"
+                },
+                { "id" : "R2",
+                 "placement" : {
+                                "row": 8,
+                                "col": 8 
+                 },
+                  "color" : "0x22222"
+                }
+               ],
+    "walls" : [
+                { "id" : "w1",
+                 "placement" : {
+                                  "row": 2,
+                                  "col": 2
+                               }
+		            },
+                { "id" : "w2",
+                 "placement" : {
+                                  "row": 1,
+                                  "col": 5
+                               }
+		            },
+                { "id" : "w3",
+                 "placement" : {
+                                  "row": 6,
+                                  "col": 4
+                               }
+		            },
+                { "id" : "w4",
+                 "placement" : {
+                                  "row": 5,
+                                  "col": 2
+                               }
+		            }
+   	     ]
+    ,
+    "grid" : {
+                "numberOfRows" : 8,
+                "numberOfCols" : 8,
+                "cellSpacing" : 3,
+                "cellProperties" :{
+                                      "width" : 20,
+                                      "height" : 20
+                                  },
+                "cellColor" : "0x00ee22"
+
+             }
+
+	}
+}
