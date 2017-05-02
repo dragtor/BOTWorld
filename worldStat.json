@@ -99,8 +99,8 @@
    	     ]
     ,
     "grid" : {
-                "numberOfRows" : 8,
-                "numberOfCols" : 8,
+                "numberOfRows" : 10,
+                "numberOfCols" : 10,
                 "cellSpacing" : 3,
                 "cellProperties" :{
                                       "width" : 20,
