@@ -58,15 +58,15 @@
               },
     "robots" : [{ "id" : "R1",
                  "placement" : {
-                                "row": 7,
-                                "col": 7 
+                                "row": 5,
+                                "col": 9 
                  },
                   "color" : "0x22222"
                 },
                 { "id" : "R2",
                  "placement" : {
-                                "row": 8,
-                                "col": 8 
+                                "row": 9,
+                                "col": 5 
                  },
                   "color" : "0x22222"
                 }
@@ -94,6 +94,12 @@
                  "placement" : {
                                   "row": 5,
                                   "col": 2
+                               }
+		            },
+                { "id" : "w5",
+                 "placement" : {
+                                  "row": 5,
+                                  "col": 3
                                }
 		            }
    	     ]

@@ -233,6 +233,13 @@ function init(myObj) {
       scene.add(cell);
     }
   }
+  var wallPosition = {};
+  function include(arr, obj) {
+    for(var i=0; i<arr.length; i++) {
+        if (arr[i] == obj) return true;
+    }
+}
+
   numberOfWalls = (myObj.objects.walls).length;
   for (var i = 0; i < numberOfWalls; i++) {
     var wallJson = myObj.objects.walls[i];
@@ -245,11 +252,20 @@ function init(myObj) {
     wall.position.z = - ((planeGeometry.parameters.height) / 2) + cellZ / 2 + spacing + (spacing + cellZ) * (wallDetails.rowPosition - 1);
     wall.position.x = - ((planeGeometry.parameters.width) / 2) + cellX / 2 + spacing + (spacing + cellX) * (wallDetails.colPosition - 1);
     wall.position.y = 43; //do not change this
-    scene.add(wall);
+    var rowPos = (wallDetails.rowPosition).toString();
+     console.log(rowPos);
+    if(!wallPosition[rowPos]){
+        wallPosition[rowPos] = [];
+    }
+
+    wallPosition[rowPos].push(wallDetails.colPosition);
+
+   scene.add(wall);
   }
   numberOfRobots = (myObj.objects.robots).length;
+
   var robotPosition = {};
-  for (var i = 0; i < numberOfRobots; i++) {
+   for (var i = 0; i < numberOfRobots; i++) {  //for (var i = 0; i < 1; i++) {  //
     var robotJson = myObj.objects.robots[i];
     var robotDetails = readRobotDetails(robotJson);
     var robotGeometry = new THREE.BoxGeometry(cellX, 25, cellZ);
@@ -262,16 +278,17 @@ function init(myObj) {
     robot.position.x = - ((planeGeometry.parameters.width) / 2) + cellX / 2 + spacing + (spacing + cellX) * (robotDetails.colPosition - 1);
     robot.position.y = 17; //do not change this
     robot.name = 'robot' + (i + 1).toString();
-    var randomnumber = Math.floor(Math.random() * (3- 0 + 1)) + 0;
+    var max = 3;
+    var min = 0;
+    var randomnumber =Math.floor(Math.random() * (max - min +1)) + min ;
     robotPosition[robot.name] = {'row':robotDetails.rowPosition , 'col' :robotDetails.colPosition , direction : randomnumber };
      var rotateAngle = Math.PI / 2;
-  
-    for (var k = 0 ; k< randomnumber ; k++){
+    for (var k = 0 ; k < randomnumber ; k++){
       robot.rotateOnAxis(new THREE.Vector3(0, 1, 0), -rotateAngle);
     } 
-    scene.add(robot);
+   scene.add(robot);
   }
-  console.log(robotPosition['robot1'].row);
+
   var ambientLight = new THREE.AmbientLight(2697513);
   scene.add(ambientLight);
   var directionalLight = new THREE.DirectionalLight(16777215, 0.7);
@@ -283,89 +300,72 @@ function init(myObj) {
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.shadowMapEnabled = true;
   document.getElementById('WebGL-output').appendChild(renderer.domElement);
-  render();
   
- // alert(robotPosition['robot1']);
+   function isWall(rowPos,colPos){
+    if(wallPosition[rowPos]){
+     return (include(wallPosition[rowPos], colPos)==true) ? 1:-1;
+    }
+    return -1;
+  }
+
+  render();
+
   function render() {
     var delta = clock.getDelta();
     var rotateAngle = Math.PI / 2;
     //var moveDistance = 200; // 200 pixels per second
    // flyControls.update(delta);
-    r1 = scene.getObjectByName('robot1');
+    robotName = 'robot2'
+    r1 = scene.getObjectByName(robotName);
      
     if (keyboard.pressed('W')) {
         // anticlockwise  //turn left by 90 Degree
-      // alert(robotPosition['robot1'].direction);
         r1.rotateOnAxis(new THREE.Vector3(0, 1, 0), rotateAngle);// To rotate robot r1 by angle
-        var robotDir = robotPosition['robot1'].direction; 
-      robotPosition['robot1'].direction = ((robotDir - 1)== -1) ? 3 : (robotDir-1);
-
+        var robotDir = robotPosition[robotName].direction; 
+      robotPosition[robotName].direction = ((robotDir - 1)== -1) ? 3 : (robotDir-1);
+      console.log('dir' +robotPosition[robotName].direction);
     }
      
     if (keyboard.pressed('E')) {
       // clockwise  //turn left by 90 Degree
-     // alert(robotPosition['robot1'].direction);
         r1.rotateOnAxis(new THREE.Vector3(0, 1, 0), -rotateAngle);// To rotate robot r1 by angle
-        var robotDir = robotPosition['robot1'].direction; 
-        robotPosition['robot1'].direction = ((robotDir + 1)== 4) ? 0 : (robotDir+1);
-
+        var robotDir = robotPosition[robotName].direction; 
+        robotPosition[robotName].direction = ((robotDir + 1)== 4) ? 0 : (robotDir+1);
+        console.log(robotPosition[robotName].direction);
     }
     if (keyboard.pressed('S')){
-     
-       robotRowPosition = robotPosition['robot1'].row;
-       robotColPosition = robotPosition['robot1'].col;
-       robotDir = robotPosition['robot1'].direction;
-      alert(robotDir);
+       robotRowPosition = robotPosition[robotName].row;
+       robotColPosition = robotPosition[robotName].col;
+       robotDir = robotPosition[robotName].direction;
+      
+       if(checkIsValidMove(robotRowPosition,robotColPosition,robotDir)== -1){
+         console.log('next move is Invalid');
+       }else{
+         console.log('next move is Valid');
       if(robotDir == 0){
-       r1.position.z = - ((planeGeometry.parameters.width) / 2) + cellZ/ 2 + spacing + (spacing + cellZ) * ( (robotRowPosition -1) - 1);
-       robotPosition['robot1'] = {'row': (robotRowPosition-1)  , 'col' : robotColPosition , direction : robotDir };
-      
+        r1.position.z = - ((planeGeometry.parameters.height) / 2) + cellZ / 2 + spacing + (spacing + cellZ) * (( robotRowPosition-1) - 1);
+        r1.position.x = - ((planeGeometry.parameters.width) / 2) + cellX / 2 + spacing + (spacing + cellX) * (robotColPosition - 1);
+        r1.position.y = 17; //do not change this
+        robotPosition[robotName] = {'row': (robotRowPosition-1)  , 'col' : robotColPosition , direction : robotDir };      
      }else if(robotDir == 1){
-       r1.position.x = - ((planeGeometry.parameters.height) / 2) + cellX / 2 + spacing + (spacing + cellX) * ((robotRowPosition+1) - 1);
-       robotPosition['robot1'] = {'row': (robotRowPosition+1)  , 'col' :(robotColPosition) , direction : robotDir };
-     
+       r1.position.z = - ((planeGeometry.parameters.height) / 2) + cellZ / 2 + spacing + (spacing + cellZ) * ( robotRowPosition - 1);
+        r1.position.x = - ((planeGeometry.parameters.width) / 2) + cellX / 2 + spacing + (spacing + cellX) * (robotColPosition+1 - 1);
+        r1.position.y = 17; //do not change this
+        robotPosition[robotName] = {'row': robotRowPosition  , 'col' : (robotColPosition+1) , direction : robotDir }; 
      }else if(robotDir == 2){
-       //r1.position.x = - ((planeGeometry.parameters.width) / 2) + cellX / 2 + spacing + (spacing + cellX) * ( (robotRowPosition+1) - 1);
-       r1.position.z = - ((planeGeometry.parameters.width) / 2) + cellZ/ 2 + spacing + (spacing + cellZ) * ( (robotRowPosition +1) - 1);
-       robotPosition['robot1'] = {'row': (robotRowPosition+1)  , 'col' : robotColPosition , direction : robotDir };
-       //r1.position.z = - ((planeGeometry.parameters.width) / 2) + cellZ / 2 + spacing + (spacing + cellZ) * ( (robotRowPosition+1) - 1); //right
-       //robotPosition['robot1'] = {'row': (robotRowPosition+1)  , 'col' :robotColPosition , direction : robotDir };
-     
+       r1.position.z = - ((planeGeometry.parameters.height) / 2) + cellZ / 2 + spacing + (spacing + cellZ) * (( robotRowPosition+1) - 1);
+        r1.position.x = - ((planeGeometry.parameters.width) / 2) + cellX / 2 + spacing + (spacing + cellX) * (robotColPosition - 1);
+        r1.position.y = 17; //do not change this
+        robotPosition[robotName] = {'row': (robotRowPosition+1)  , 'col' : robotColPosition , direction : robotDir }; 
      }else if(robotDir == 3){
-       r1.position.x = - ((planeGeometry.parameters.height) / 2) + cellX / 2 + spacing + (spacing + cellX) * ((robotRowPosition-1) - 1);
-       robotPosition['robot1'] = {'row': (robotRowPosition-1)  , 'col' :(robotColPosition) , direction : robotDir };
+       r1.position.z = - ((planeGeometry.parameters.height) / 2) + cellZ / 2 + spacing + (spacing + cellZ) * ( robotRowPosition - 1);
+        r1.position.x = - ((planeGeometry.parameters.width) / 2) + cellX / 2 + spacing + (spacing + cellX) * ((robotColPosition-1) - 1);
+        r1.position.y = 17; //do not change this
+        robotPosition[robotName] = {'row': robotRowPosition  , 'col' : (robotColPosition-1) , direction : robotDir }; 
      }
+       }
     }
-   
-    if (keyboard.pressed('Z')) {
-       alert("cam changes");
-       //set initial camera
-   /*   var relativeCameraOffset = new THREE.Vector3(0, 20, 120);
-    var cameraOffset = relativeCameraOffset.applyMatrix4(r1.matrixWorld);
-    camera.position.x = cameraOffset.x;
-    camera.position.y = cameraOffset.y;
-    camera.position.z = cameraOffset.z;*/
-    
-        var robotDir = robotPosition['robot1'].direction; 
-        if(robotDir == 0){
-          alert("yes called0");
-          r1.rotation.y =  Math.PI / 2;
-          camera.rotation.x = 0;
-          
-        }else if(robotDir == 1){
-          alert("yes called1");
-          camera.rotation.x = 90 * Math.PI / 180 ;
-         /* */
-        }else if(robotDir == 2){
-          r1.rotation.y =  Math.PI / 2;
-          alert("yes called2");
-          camera.rotation.y = 90*2 * Math.PI / 180 ;
-        }else if(robotDir == 3){
-          alert("yes called3");
-          camera.rotation.x = 90*3 * Math.PI / 180 ;
-        }
-      
-     }
+ 
     
     var relativeCameraOffset = new THREE.Vector3(0, 20, 120);//0,20,120
     var cameraOffset = relativeCameraOffset.applyMatrix4(r1.matrixWorld);
@@ -378,4 +378,20 @@ function init(myObj) {
     renderer.render(scene, camera);
   }
  
+ function checkIsValidMove(curRowPos,curColPos,dir){
+    if(dir == 0){
+      console.log(isWall(curRowPos-1,curColPos));
+      return (((curRowPos - 1)-1) > -1 && !(isWall(curRowPos-1,curColPos)==1))? 1:-1 ;
+    } else  if(dir == 1){
+       console.log(isWall(curRowPos,curColPos+1));
+     return ((((curColPos + 1)-1) < numberOfCols) && !(isWall(curRowPos,curColPos+1)==1))  ? 1:-1
+    } else  if(dir == 2){
+       console.log(isWall(curRowPos+1,curColPos));
+      return ((((curRowPos + 1)-1) < numberOfRows ) && !(isWall(curRowPos+1,curColPos)==1))  ? 1:-1 ;
+    } else  if(dir == 3){
+       console.log(isWall(curRowPos,curColPos-1));
+      return ((((curColPos - 1)-1) > -1 )  && !(isWall(curRowPos,curColPos-1)==1)) ? 1:-1 ;
+    }
+ }
+  
 }
