@@ -206,13 +206,13 @@ function init(myObj) {
   camera.position.y = cameraDetails.placement_y;
   camera.position.z = cameraDetails.placement_z;
   camera.lookAt(scene.position);
-  /* var flyControls = new THREE.FlyControls(camera);
+   var flyControls = new THREE.FlyControls(camera);
   flyControls.movementSpeed = 25;
   flyControls.domElement = document.querySelector('#WebGL-output');
   flyControls.rollSpeed = Math.PI / 24;
   flyControls.autoForward = false;
   flyControls.dragToLook = false;
-  flyControls.enabled = false;*/
+  flyControls.enabled = false;
   var gridDetails = readGridDetails(myObj.objects.grid);
   var cellX = gridDetails.cellWidth; // by user
   var cellY = 4; // do not change this
@@ -388,29 +388,56 @@ function init(myObj) {
     }
     return 1;
   }
+  
+  var fflag = true;
+  var controls = new function () {
+            this.perspective = "Perspective";
+            //this.robot_name = 'robot1';
+            this.switchCamera = function () {
+              
+                if (fflag==true) {
+                 // console.log(this.perspective + "changing to FollowRobot");
+                     fflag = false;
+                  this.perspective = "FollowRobot"
+                
+                } else {
+                 // console.log(this.perspective + "changing to Perspective ");
+                  fflag = true;
+                    this.perspective = "Perspective";
+                }
+            };
+        };
+
+        var gui = new dat.GUI();
+        gui.add(controls, 'switchCamera');
+        gui.add(controls, 'perspective').listen();
+  
+  
   render();
   function render() {
     var delta = clock.getDelta();
     var rotateAngle = Math.PI / 2;
     //var moveDistance = 200; // 200 pixels per second
-    //flyControls.update(delta);
+    if(fflag == true){
+    flyControls.update(delta);
+    }
     robotName = 'robot1'
     r1 = scene.getObjectByName(robotName);
-    if (keyboard.pressed('W')) {
+    if (keyboard.pressed('I')) {
       // anticlockwise  //turn left by 90 Degree
       r1.rotateOnAxis(new THREE.Vector3(0, 1, 0), rotateAngle); // To rotate robot r1 by angle
       var robotDir = robotPosition[robotName].direction;
       robotPosition[robotName].direction = ((robotDir - 1) == - 1) ? 3 : (robotDir - 1);
       console.log('dir' + robotPosition[robotName].direction);
     }
-    if (keyboard.pressed('E')) {
+    if (keyboard.pressed('O')) {
       // clockwise  //turn left by 90 Degree
       r1.rotateOnAxis(new THREE.Vector3(0, 1, 0), - rotateAngle); // To rotate robot r1 by angle
       var robotDir = robotPosition[robotName].direction;
       robotPosition[robotName].direction = ((robotDir + 1) == 4) ? 0 : (robotDir + 1);
       console.log(robotPosition[robotName].direction);
     }
-    if (keyboard.pressed('S')) {
+    if (keyboard.pressed('K')) {
       robotRowPosition = robotPosition[robotName].row;
       robotColPosition = robotPosition[robotName].col;
       robotDir = robotPosition[robotName].direction;
@@ -478,7 +505,7 @@ function init(myObj) {
         scene.remove(coinObj);
       }
     }
-    if (keyboard.pressed('D')) {
+    if (keyboard.pressed('L')) {
       // Pick coin
       var robotRowPosition = robotPosition[robotName].row;
       var robotColPosition = robotPosition[robotName].col;
@@ -521,12 +548,14 @@ function init(myObj) {
         scene.add(coin);
       }
     }
+    if(fflag == false){
     var relativeCameraOffset = new THREE.Vector3(0, 70, 120); //0,20,120
     var cameraOffset = relativeCameraOffset.applyMatrix4(r1.matrixWorld);
     camera.position.x = cameraOffset.x;
     camera.position.y = cameraOffset.y;
     camera.position.z = cameraOffset.z;
     camera.lookAt(r1.position);
+    }
     requestAnimationFrame(render);
     renderer.render(scene, camera);
   }
