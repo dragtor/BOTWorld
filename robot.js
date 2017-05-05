@@ -138,6 +138,16 @@ function readWallDetails(wall) {
     'colPosition': colPosition
   };
 }
+function readCoinDetails(coin) {
+  coinId = JSON.stringify(coin.id);
+  rowPosition = parseInt(JSON.stringify(coin.placement.row));
+  colPosition = parseInt(JSON.stringify(coin.placement.col));
+  return {
+    'coinId': coinId,
+    'rowPosition': rowPosition,
+    'colPosition': colPosition
+  };
+}
 function readRobotDetails(robot) {
   robotId = parseInt(JSON.stringify(robot.id));
   rowPosition = parseInt(JSON.stringify(robot.placement.row));
@@ -188,18 +198,21 @@ function init(myObj) {
   var clock = new THREE.Clock();
   var cameraDetails = readCameraDetails(myObj.objects.camera);
   if (cameraDetails.type == 'perspective') {
+    // var camera = new THREE.PerspectiveCamera(cameraDetails.field_of_view, cameraDetails.aspect_ratio, cameraDetails.near, cameraDetails.far);
     var camera = new THREE.PerspectiveCamera(cameraDetails.field_of_view, cameraDetails.aspect_ratio, cameraDetails.near, cameraDetails.far);
+    // var camera = new THREE.OrthographicCamera(window.innerWidth / - 16, window.innerWidth / 16,window.innerHeight / 16, window.innerHeight / - 16,-200, 500 );
   }
   camera.position.x = cameraDetails.placement_x;
   camera.position.y = cameraDetails.placement_y;
   camera.position.z = cameraDetails.placement_z;
-  var flyControls = new THREE.FlyControls(camera);
+  camera.lookAt(scene.position);
+  /* var flyControls = new THREE.FlyControls(camera);
   flyControls.movementSpeed = 25;
   flyControls.domElement = document.querySelector('#WebGL-output');
   flyControls.rollSpeed = Math.PI / 24;
   flyControls.autoForward = false;
   flyControls.dragToLook = false;
-  flyControls.enabled = false;
+  flyControls.enabled = false;*/
   var gridDetails = readGridDetails(myObj.objects.grid);
   var cellX = gridDetails.cellWidth; // by user
   var cellY = 4; // do not change this
@@ -233,13 +246,13 @@ function init(myObj) {
       scene.add(cell);
     }
   }
-  var wallPosition = {};
+  var wallPosition = {
+  };
   function include(arr, obj) {
-    for(var i=0; i<arr.length; i++) {
-        if (arr[i] == obj) return true;
+    for (var i = 0; i < arr.length; i++) {
+      if (arr[i] == obj) return true;
     }
-}
-
+  }
   numberOfWalls = (myObj.objects.walls).length;
   for (var i = 0; i < numberOfWalls; i++) {
     var wallJson = myObj.objects.walls[i];
@@ -253,26 +266,67 @@ function init(myObj) {
     wall.position.x = - ((planeGeometry.parameters.width) / 2) + cellX / 2 + spacing + (spacing + cellX) * (wallDetails.colPosition - 1);
     wall.position.y = 43; //do not change this
     var rowPos = (wallDetails.rowPosition).toString();
-     console.log(rowPos);
-    if(!wallPosition[rowPos]){
-        wallPosition[rowPos] = [];
+    console.log(rowPos);
+    if (!wallPosition[rowPos]) {
+      wallPosition[rowPos] = [
+      ];
     }
-
     wallPosition[rowPos].push(wallDetails.colPosition);
-
-   scene.add(wall);
+    scene.add(wall);
   }
+ // var coinPosition = {
+ // };
+  var coinInfo = {
+  }; //{"c1" :{ "holder" : "grid" , "row":1,"col" :2 ,"geometryId":"coin1"},"c2": {"holder" :"robot","robotId":"r1" ,"geometryId":"coin2"}};
+  var gridCoinNameMapper = {
+  }; // {"1" :{"2" : "coin1" , "3":"coin2"}};
+  var coinNameCoinIdMapper = {
+  }; //{"coin1" : "c1"}; // coinNameCoinIdMapper :: (( coin Geometry Name ),coinId )
+  console.log(coinInfo);
+  numberOfCoins = (myObj.objects.coins).length;
+  for (var i = 0; i < numberOfCoins; i++) {
+    var coinJson = myObj.objects.coins[i];
+    var coinDetails = readCoinDetails(coinJson);
+    //console.log(coinDetails);
+    var coinGeometry = new THREE.CylinderGeometry(5, 5, 5, 32);
+    var coinMaterial = new THREE.MeshBasicMaterial({
+      color: 16776960
+    });
+    var coin = new THREE.Mesh(coinGeometry, coinMaterial);
+    coin.name = 'coin' + (i + 1).toString();
+    coin.position.z = - ((planeGeometry.parameters.height) / 2) + cellZ / 2 + spacing + (spacing + cellZ) * (coinDetails.rowPosition - 1);
+    coin.position.x = - ((planeGeometry.parameters.width) / 2) + cellX / 2 + spacing + (spacing + cellX) * (coinDetails.colPosition - 1);
+    coin.position.y = 5; //do not change this
+    var rowPos = (coinDetails.rowPosition).toString();
+    console.log(rowPos);
+    if (!gridCoinNameMapper[rowPos]) {
+      gridCoinNameMapper[rowPos] = {
+      };
+    }
+    var colPos = (coinDetails.colPosition).toString();
+    gridCoinNameMapper[rowPos][colPos] = coin.name;
+    coinNameCoinIdMapper[coin.name] = coinDetails.coinId;
+    coinInfo[coinDetails.coinId] = {
+      'holder': 'grid',
+      'row': coinDetails.rowPosition,
+      'col': coinDetails.colPosition,
+      'geometryId': coin.name
+    };
+    scene.add(coin);
+  }
+  console.log(gridCoinNameMapper);
+  console.log(coinNameCoinIdMapper);
+  console.log(coinInfo);
   numberOfRobots = (myObj.objects.robots).length;
-
-  var robotPosition = {};
-   for (var i = 0; i < numberOfRobots; i++) {  //for (var i = 0; i < 1; i++) {  //
+  var robotPosition = {
+  };
+  for (var i = 0; i < numberOfRobots; i++) { //for (var i = 0; i < 1; i++) {  //
     var robotJson = myObj.objects.robots[i];
     var robotDetails = readRobotDetails(robotJson);
     var robotGeometry = new THREE.BoxGeometry(cellX, 25, cellZ);
     var robotMaterial = new THREE.MeshLambertMaterial({
       color: robotDetails.color
     });
-    
     var robot = new THREE.Mesh(robotGeometry, robotMaterial);
     robot.position.z = - ((planeGeometry.parameters.height) / 2) + cellZ / 2 + spacing + (spacing + cellZ) * (robotDetails.rowPosition - 1);
     robot.position.x = - ((planeGeometry.parameters.width) / 2) + cellX / 2 + spacing + (spacing + cellX) * (robotDetails.colPosition - 1);
@@ -280,15 +334,20 @@ function init(myObj) {
     robot.name = 'robot' + (i + 1).toString();
     var max = 3;
     var min = 0;
-    var randomnumber =Math.floor(Math.random() * (max - min +1)) + min ;
-    robotPosition[robot.name] = {'row':robotDetails.rowPosition , 'col' :robotDetails.colPosition , direction : randomnumber };
-     var rotateAngle = Math.PI / 2;
-    for (var k = 0 ; k < randomnumber ; k++){
-      robot.rotateOnAxis(new THREE.Vector3(0, 1, 0), -rotateAngle);
-    } 
-   scene.add(robot);
+    var randomnumber = Math.floor(Math.random() * (max - min + 1)) + min;
+    robotPosition[robot.name] = {
+      'row': robotDetails.rowPosition,
+      'col': robotDetails.colPosition,
+      direction: randomnumber,
+      coins: [
+      ]
+    };
+    var rotateAngle = Math.PI / 2;
+    for (var k = 0; k < randomnumber; k++) {
+      robot.rotateOnAxis(new THREE.Vector3(0, 1, 0), - rotateAngle);
+    }
+    scene.add(robot);
   }
-
   var ambientLight = new THREE.AmbientLight(2697513);
   scene.add(ambientLight);
   var directionalLight = new THREE.DirectionalLight(16777215, 0.7);
@@ -300,98 +359,190 @@ function init(myObj) {
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.shadowMapEnabled = true;
   document.getElementById('WebGL-output').appendChild(renderer.domElement);
-  
-   function isWall(rowPos,colPos){
-    if(wallPosition[rowPos]){
-     return (include(wallPosition[rowPos], colPos)==true) ? 1:-1;
+  function isWall(rowPos, colPos) {
+    if (wallPosition[rowPos]) {
+      return (include(wallPosition[rowPos], colPos) == true) ? 1 : - 1;
     }
-    return -1;
+    return - 1;
   }
-
+  function isCoin(rowPos, colPos) {
+    if (gridCoinNameMapper[rowPos]) {
+      return (gridCoinNameMapper[rowPos][colPos] == undefined) ? - 1 : 1;
+      // return (include(gridCoinNameMapper[rowPos], colPos)==true) ? 1:-1;
+    }
+    return - 1;
+  }
+  function removeCoin(rowPos, colPos) {
+    delete gridCoinNameMapper[rowPos][colPos];
+  }
+  function isRobot(rowPos, colPos) {
+    if (robotPosition[rowPos]) {
+      return (include(robotPosition[rowPos], colPos) == true) ? 1 : - 1;
+    }
+    return - 1;
+  }
+  function isCoinWithRobot(robotName) {
+    var currentCoinStatus = robotPosition[robotName].coins;
+    if (currentCoinStatus.length == 0) {
+      return - 1;
+    }
+    return 1;
+  }
   render();
-
   function render() {
     var delta = clock.getDelta();
     var rotateAngle = Math.PI / 2;
     //var moveDistance = 200; // 200 pixels per second
-   // flyControls.update(delta);
-    robotName = 'robot2'
+    //flyControls.update(delta);
+    robotName = 'robot1'
     r1 = scene.getObjectByName(robotName);
-     
     if (keyboard.pressed('W')) {
-        // anticlockwise  //turn left by 90 Degree
-        r1.rotateOnAxis(new THREE.Vector3(0, 1, 0), rotateAngle);// To rotate robot r1 by angle
-        var robotDir = robotPosition[robotName].direction; 
-      robotPosition[robotName].direction = ((robotDir - 1)== -1) ? 3 : (robotDir-1);
-      console.log('dir' +robotPosition[robotName].direction);
+      // anticlockwise  //turn left by 90 Degree
+      r1.rotateOnAxis(new THREE.Vector3(0, 1, 0), rotateAngle); // To rotate robot r1 by angle
+      var robotDir = robotPosition[robotName].direction;
+      robotPosition[robotName].direction = ((robotDir - 1) == - 1) ? 3 : (robotDir - 1);
+      console.log('dir' + robotPosition[robotName].direction);
     }
-     
     if (keyboard.pressed('E')) {
       // clockwise  //turn left by 90 Degree
-        r1.rotateOnAxis(new THREE.Vector3(0, 1, 0), -rotateAngle);// To rotate robot r1 by angle
-        var robotDir = robotPosition[robotName].direction; 
-        robotPosition[robotName].direction = ((robotDir + 1)== 4) ? 0 : (robotDir+1);
-        console.log(robotPosition[robotName].direction);
+      r1.rotateOnAxis(new THREE.Vector3(0, 1, 0), - rotateAngle); // To rotate robot r1 by angle
+      var robotDir = robotPosition[robotName].direction;
+      robotPosition[robotName].direction = ((robotDir + 1) == 4) ? 0 : (robotDir + 1);
+      console.log(robotPosition[robotName].direction);
     }
-    if (keyboard.pressed('S')){
-       robotRowPosition = robotPosition[robotName].row;
-       robotColPosition = robotPosition[robotName].col;
-       robotDir = robotPosition[robotName].direction;
-      
-       if(checkIsValidMove(robotRowPosition,robotColPosition,robotDir)== -1){
-         console.log('next move is Invalid');
-       }else{
-         console.log('next move is Valid');
-      if(robotDir == 0){
-        r1.position.z = - ((planeGeometry.parameters.height) / 2) + cellZ / 2 + spacing + (spacing + cellZ) * (( robotRowPosition-1) - 1);
-        r1.position.x = - ((planeGeometry.parameters.width) / 2) + cellX / 2 + spacing + (spacing + cellX) * (robotColPosition - 1);
-        r1.position.y = 17; //do not change this
-        robotPosition[robotName] = {'row': (robotRowPosition-1)  , 'col' : robotColPosition , direction : robotDir };      
-     }else if(robotDir == 1){
-       r1.position.z = - ((planeGeometry.parameters.height) / 2) + cellZ / 2 + spacing + (spacing + cellZ) * ( robotRowPosition - 1);
-        r1.position.x = - ((planeGeometry.parameters.width) / 2) + cellX / 2 + spacing + (spacing + cellX) * (robotColPosition+1 - 1);
-        r1.position.y = 17; //do not change this
-        robotPosition[robotName] = {'row': robotRowPosition  , 'col' : (robotColPosition+1) , direction : robotDir }; 
-     }else if(robotDir == 2){
-       r1.position.z = - ((planeGeometry.parameters.height) / 2) + cellZ / 2 + spacing + (spacing + cellZ) * (( robotRowPosition+1) - 1);
-        r1.position.x = - ((planeGeometry.parameters.width) / 2) + cellX / 2 + spacing + (spacing + cellX) * (robotColPosition - 1);
-        r1.position.y = 17; //do not change this
-        robotPosition[robotName] = {'row': (robotRowPosition+1)  , 'col' : robotColPosition , direction : robotDir }; 
-     }else if(robotDir == 3){
-       r1.position.z = - ((planeGeometry.parameters.height) / 2) + cellZ / 2 + spacing + (spacing + cellZ) * ( robotRowPosition - 1);
-        r1.position.x = - ((planeGeometry.parameters.width) / 2) + cellX / 2 + spacing + (spacing + cellX) * ((robotColPosition-1) - 1);
-        r1.position.y = 17; //do not change this
-        robotPosition[robotName] = {'row': robotRowPosition  , 'col' : (robotColPosition-1) , direction : robotDir }; 
-     }
-       }
+    if (keyboard.pressed('S')) {
+      robotRowPosition = robotPosition[robotName].row;
+      robotColPosition = robotPosition[robotName].col;
+      robotDir = robotPosition[robotName].direction;
+      robotCoin = robotPosition[robotName].coins;
+      if (checkIsValidMove(robotRowPosition, robotColPosition, robotDir) == - 1) {
+        console.log('next move is Invalid');
+      } else {
+        console.log('next move is Valid');
+        if (robotDir == 0) {
+          r1.position.z = - ((planeGeometry.parameters.height) / 2) + cellZ / 2 + spacing + (spacing + cellZ) * ((robotRowPosition - 1) - 1);
+          robotPosition[robotName] = {
+            'row': (robotRowPosition - 1),
+            'col': robotColPosition,
+            direction: robotDir,
+            coins: robotCoin
+          };
+        } else if (robotDir == 1) {
+          r1.position.x = - ((planeGeometry.parameters.width) / 2) + cellX / 2 + spacing + (spacing + cellX) * (robotColPosition + 1 - 1);
+          robotPosition[robotName] = {
+            'row': robotRowPosition,
+            'col': (robotColPosition + 1),
+            direction: robotDir,
+            coins: robotCoin
+          };
+        } else if (robotDir == 2) {
+          r1.position.z = - ((planeGeometry.parameters.height) / 2) + cellZ / 2 + spacing + (spacing + cellZ) * ((robotRowPosition + 1) - 1);
+          robotPosition[robotName] = {
+            'row': (robotRowPosition + 1),
+            'col': robotColPosition,
+            direction: robotDir,
+            coins: robotCoin
+          };
+        } else if (robotDir == 3) {
+          r1.position.x = - ((planeGeometry.parameters.width) / 2) + cellX / 2 + spacing + (spacing + cellX) * ((robotColPosition - 1) - 1);
+          robotPosition[robotName] = {
+            'row': robotRowPosition,
+            'col': (robotColPosition - 1),
+            direction: robotDir,
+            coins: robotCoin
+          };
+        }
+      }
     }
- 
-    
-    var relativeCameraOffset = new THREE.Vector3(0, 20, 120);//0,20,120
+    if (keyboard.pressed('P')) {
+      // Pick coin
+      var robotRowPosition = robotPosition[robotName].row;
+      var robotColPosition = robotPosition[robotName].col;
+      robotDir = robotPosition[robotName].direction;
+      var currentCoinStatus = robotPosition[robotName].coins;
+      if (isCoin(robotRowPosition, robotColPosition) == - 1) {
+        console.log('Coin is not present');
+      } else {
+        var coinGeometryName = gridCoinNameMapper[robotRowPosition][robotColPosition];
+        //console.log(coinGeometryName);
+        var coinObj = scene.getObjectByName(coinGeometryName);
+        var coinId = coinNameCoinIdMapper[coinObj.name];
+        coinInfo[coinId] = {
+          'holder': 'robot',
+          'robotId': robotName,
+          'geometryId':coinObj.name
+        };
+        currentCoinStatus.push(coinId);
+        removeCoin(robotRowPosition, robotColPosition);
+        //console.log(robotPosition[robotName]);
+        scene.remove(coinObj);
+      }
+    }
+    if (keyboard.pressed('D')) {
+      // Pick coin
+      var robotRowPosition = robotPosition[robotName].row;
+      var robotColPosition = robotPosition[robotName].col;
+      robotDir = robotPosition[robotName].direction;
+      var currentCoinStatus = robotPosition[robotName].coins;
+      if (isCoinWithRobot(robotName) == - 1) {
+        console.log('Coin is not in Wallet');
+      } else {
+        var coinid = currentCoinStatus[0]
+        var index = currentCoinStatus.indexOf(coinid)
+        if (index > - 1) {
+          currentCoinStatus.splice(index, 1);
+        }
+        //console.log(robotPosition[robotName]);    
+
+        var coinGeometry = new THREE.CylinderGeometry(5, 5, 5, 32);
+        var coinMaterial = new THREE.MeshBasicMaterial({
+          color: 16776960
+        });
+        var coin = new THREE.Mesh(coinGeometry, coinMaterial);
+        coin.name = coinInfo[coinid].geometryId;
+        coin.position.z = - ((planeGeometry.parameters.height) / 2) + cellZ / 2 + spacing + (spacing + cellZ) * (robotRowPosition - 1);
+        coin.position.x = - ((planeGeometry.parameters.width) / 2) + cellX / 2 + spacing + (spacing + cellX) * (robotColPosition - 1);
+        coin.position.y = 5; //do not change this
+        var rowPos = (robotRowPosition).toString();
+        console.log(rowPos);
+        if (!gridCoinNameMapper[rowPos]) {
+          gridCoinNameMapper[rowPos] = {
+          };
+        }
+        var colPos = (robotColPosition).toString();
+        gridCoinNameMapper[rowPos][colPos] = coin.name;
+        coinInfo[coinDetails.coinId] = {
+          'holder': 'grid',
+          'row': robotRowPosition,
+          'col': robotColPosition,
+          'geometryId': coin.name
+        };
+       // console.log(coinInfo);
+        scene.add(coin);
+      }
+    }
+    var relativeCameraOffset = new THREE.Vector3(0, 70, 120); //0,20,120
     var cameraOffset = relativeCameraOffset.applyMatrix4(r1.matrixWorld);
     camera.position.x = cameraOffset.x;
     camera.position.y = cameraOffset.y;
     camera.position.z = cameraOffset.z;
     camera.lookAt(r1.position);
-    
     requestAnimationFrame(render);
     renderer.render(scene, camera);
   }
- 
- function checkIsValidMove(curRowPos,curColPos,dir){
-    if(dir == 0){
-      console.log(isWall(curRowPos-1,curColPos));
-      return (((curRowPos - 1)-1) > -1 && !(isWall(curRowPos-1,curColPos)==1))? 1:-1 ;
-    } else  if(dir == 1){
-       console.log(isWall(curRowPos,curColPos+1));
-     return ((((curColPos + 1)-1) < numberOfCols) && !(isWall(curRowPos,curColPos+1)==1))  ? 1:-1
-    } else  if(dir == 2){
-       console.log(isWall(curRowPos+1,curColPos));
-      return ((((curRowPos + 1)-1) < numberOfRows ) && !(isWall(curRowPos+1,curColPos)==1))  ? 1:-1 ;
-    } else  if(dir == 3){
-       console.log(isWall(curRowPos,curColPos-1));
-      return ((((curColPos - 1)-1) > -1 )  && !(isWall(curRowPos,curColPos-1)==1)) ? 1:-1 ;
+  function checkIsValidMove(curRowPos, curColPos, dir) {
+    if (dir == 0) {
+      console.log(isWall(curRowPos - 1, curColPos));
+      return (((curRowPos - 1) - 1) > - 1 && !(isWall(curRowPos - 1, curColPos) == 1)) ? 1 : - 1;
+    } else if (dir == 1) {
+      console.log(isWall(curRowPos, curColPos + 1));
+      return ((((curColPos + 1) - 1) < numberOfCols) && !(isWall(curRowPos, curColPos + 1) == 1)) ? 1 : - 1
+    } else if (dir == 2) {
+      console.log(isWall(curRowPos + 1, curColPos));
+      return ((((curRowPos + 1) - 1) < numberOfRows) && !(isWall(curRowPos + 1, curColPos) == 1)) ? 1 : - 1;
+    } else if (dir == 3) {
+      console.log(isWall(curRowPos, curColPos - 1));
+      return ((((curColPos - 1) - 1) > - 1) && !(isWall(curRowPos, curColPos - 1) == 1)) ? 1 : - 1;
     }
- }
-  
+  }
 }

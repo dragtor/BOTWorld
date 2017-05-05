@@ -103,7 +103,44 @@
                                }
 		            }
    	     ]
-    ,
+    ,"coins" : [
+                { "id" : 1,
+                 "placement" : {
+                                  "row": 1,
+                                  "col": 9
+                               }
+                },
+                { "id" : 2,
+                 "placement" : {
+                                  "row": 2,
+                                  "col": 9
+                               }
+                },
+                { "id" : 3,
+                 "placement" : {
+                                  "row": 3,
+                                  "col": 9
+                               }
+                },
+                { "id" : 4,
+                 "placement" : {
+                                  "row": 1,
+                                  "col": 8
+                               }
+                },
+                { "id" : 5,
+                 "placement" : {
+                                  "row": 2,
+                                  "col": 8
+                               }
+                },
+                { "id" : 6,
+                 "placement" : {
+                                  "row": 3,
+                                  "col": 8
+                               }
+                }
+    ],
     "grid" : {
                 "numberOfRows" : 10,
                 "numberOfCols" : 10,
