@@ -193,14 +193,26 @@ function readPlaneDetails(plane) {
     'rotation_z': rotation_z
   };
 }
+function readProgramDetails(program) {
+  return program;
+}
+
 function init(myObj) {
   var scene = new THREE.Scene();
   var clock = new THREE.Clock();
+  
+  var robotProgramDetails = readProgramDetails(myObj.objects.programs);
   var cameraDetails = readCameraDetails(myObj.objects.camera);
+  console.log(robotProgramDetails);
+  
+  
+   
+   
+  
+  
+  
   if (cameraDetails.type == 'perspective') {
-    // var camera = new THREE.PerspectiveCamera(cameraDetails.field_of_view, cameraDetails.aspect_ratio, cameraDetails.near, cameraDetails.far);
     var camera = new THREE.PerspectiveCamera(cameraDetails.field_of_view, cameraDetails.aspect_ratio, cameraDetails.near, cameraDetails.far);
-    // var camera = new THREE.OrthographicCamera(window.innerWidth / - 16, window.innerWidth / 16,window.innerHeight / 16, window.innerHeight / - 16,-200, 500 );
   }
   camera.position.x = cameraDetails.placement_x;
   camera.position.y = cameraDetails.placement_y;
@@ -305,6 +317,7 @@ function init(myObj) {
       gridCoinNameMapper[rowPos] = {
       };
     }
+    
     var colPos = (coinDetails.colPosition).toString();
     gridCoinNameMapper[rowPos][colPos] = coin.name;
     coinNameCoinIdMapper[coin.name] = coinDetails.coinId;
@@ -319,6 +332,12 @@ function init(myObj) {
   console.log(gridCoinNameMapper);
   console.log(coinNameCoinIdMapper);
   console.log(coinInfo);
+  
+  
+  
+  
+  
+  
   numberOfRobots = (myObj.objects.robots).length;
   var robotPosition = {
   };
@@ -350,6 +369,16 @@ function init(myObj) {
     }
     scene.add(robot);
   }
+  
+  
+  var robotProgramExecutionMetadata = { 
+                                       };
+ for (var rname in robotProgramDetails){
+    var instrLen = (robotProgramDetails[rname]).length
+    robotProgramExecutionMetadata[rname] = { 'currInstrPtr' : 0 ,'maxInstruCount':instrLen };
+   }
+  //console.log(robotProgramExecutionMetadata);
+
   var ambientLight = new THREE.AmbientLight(2697513);
   scene.add(ambientLight);
   var directionalLight = new THREE.DirectionalLight(16777215, 0.7);
@@ -361,6 +390,9 @@ function init(myObj) {
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.shadowMapEnabled = true;
   document.getElementById('WebGL-output').appendChild(renderer.domElement);
+  
+ 
+  
   function isWall(rowPos, colPos) {
     if (wallPosition[rowPos]) {
       return (include(wallPosition[rowPos], colPos) == true) ? 1 : - 1;
@@ -414,20 +446,30 @@ function init(myObj) {
         gui.add(controls, 'switchCamera');
         gui.add(controls, 'perspective').listen();
   
-  
+ 
   render();
   function render() {
+
     var delta = clock.getDelta();
-    var rotateAngle = Math.PI / 2 ;
+    var rotateAngle = Math.PI / 2 ;//*delta;
     //var moveDistance = 200; // 200 pixels per second
     if(fflag == true){
     flyControls.update(delta);
     }
-    robotName = 'robot1'
+    var robotName = 'robot1';
     r1 = scene.getObjectByName(robotName);
     if (keyboard.pressed('I')) {
       // anticlockwise  //turn left by 90 Degree
+      
+    //  while(rA <= Math.PI/2)
+    //  {
       r1.rotateOnAxis(new THREE.Vector3(0, 1, 0), rotateAngle); // To rotate robot r1 by angle
+   //     rA  = rA +delta;
+      //renderer.render(scene, camera);
+   // }
+    //  rotateAngle = Math.PI/2 - rA;
+     // r1.rotateOnAxis(new THREE.Vector3(0, 1, 0), rotateAngle);
+      rA = 0;
       var robotDir = robotPosition[robotName].direction;
       robotPosition[robotName].direction = ((robotDir - 1) == - 1) ? 3 : (robotDir - 1);
       console.log('dir' + robotPosition[robotName].direction);
@@ -577,8 +619,3 @@ function init(myObj) {
     }
   }
 }
-
-/*
-Exception: SyntaxError: An invalid or illegal string was specified
-@resource://gre/modules/commonjs/toolkit/loader.js -> resource://devtools/shared/webconsole/utils.js:1163:0
-*/
