@@ -167,7 +167,7 @@ function readPlaneDetails(plane) {
   placement_y = parseInt(JSON.stringify(plane.placement.y));
   placement_z = parseInt(JSON.stringify(plane.placement.z));
   color = parseInt(plane.color);
-  alert(color);
+ // alert(color);
   rotation = JSON.stringify(plane.rotation);
   if (rotation.charAt(0) == '"') {
     rotation = rotation.slice(1, - 1);
@@ -211,8 +211,10 @@ function init(myObj) {
   flyControls.domElement = document.querySelector('#WebGL-output');
   flyControls.rollSpeed = Math.PI / 24;
   flyControls.autoForward = false;
-  flyControls.dragToLook = false;
+  flyControls.dragToLook = true;
   flyControls.enabled = false;
+  
+  
   var gridDetails = readGridDetails(myObj.objects.grid);
   var cellX = gridDetails.cellWidth; // by user
   var cellY = 4; // do not change this
@@ -416,7 +418,7 @@ function init(myObj) {
   render();
   function render() {
     var delta = clock.getDelta();
-    var rotateAngle = Math.PI / 2;
+    var rotateAngle = Math.PI / 2 ;
     //var moveDistance = 200; // 200 pixels per second
     if(fflag == true){
     flyControls.update(delta);
@@ -575,3 +577,8 @@ function init(myObj) {
     }
   }
 }
+
+/*
+Exception: SyntaxError: An invalid or illegal string was specified
+@resource://gre/modules/commonjs/toolkit/loader.js -> resource://devtools/shared/webconsole/utils.js:1163:0
+*/
