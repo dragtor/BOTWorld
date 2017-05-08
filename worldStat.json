@@ -60,20 +60,22 @@
 			}
 		},
 		"robots": [{
-				"id": "R1",
+				"id": "robot1",
 				"placement": {
 					"row": 5,
 					"col": 9
 				},
-				"color": "0x22222"
+				"color": "0x22222",
+        "memoryCapacity": 50
 			},
 			{
-				"id": "R2",
+				"id": "robot2",
 				"placement": {
 					"row": 9,
 					"col": 5
 				},
-				"color": "0x22222"
+				"color": "0x22222",
+        "memoryCapacity": 50
 			}
 		],
 		"walls": [{
@@ -168,14 +170,29 @@
 		},
 		"programs": {
 			"robot1": [
+                 "move","move","turn","turn","pick","turn",
+                 "move","pick","turn","turn","move","turn",
+                 "move","pick","turn","turn","pick","turn",
+                 "pick","move","turn","turn","move","turn",
                  "move","move","turn","turn","move","turn",
+                 "move","move","pick","turn","pick","turn",
+                 "drop","move","drop","turn","move","turn",
+                 "move","move","turn","turn","move","pick",
                  "move","move","turn","turn","move","turn",
-                 "move","move","turn","turn","move","turn"
+                 "move","pick","turn","turn","move","turn",
+                 "move","move","drop","turn","move","turn",
+                 "drop","move","turn","turn","move","turn"
                 ],
 			"robot2": [
+                 "drop","turn","turn","move","pick","move","turn","turn","turn" ,
                  "move","turn","turn","move","move","move","turn","turn","turn" ,
+                 "pick","turn","turn","move","drop","move","turn","turn","turn" ,
+                 "move","turn","turn","drop","move","move","turn","turn","turn" ,
                  "move","turn","turn","move","move","move","turn","turn","turn" ,
-                 "move","turn","turn","move","move","move","turn","turn","turn" 
+                 "move","turn","drop","move","move","drop","turn","turn","turn" ,
+                 "pick","turn","turn","move","pick","move","turn","turn","turn" ,
+                 "move","turn","turn","move","drop","move","turn","turn","turn" ,
+                 "move","turn","turn","move","move","pick","turn","turn","turn" 
       
                 ]
 		}
